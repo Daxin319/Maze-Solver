@@ -2,8 +2,6 @@
 
 
 from tkinter import Tk, BOTH, Canvas
-from line import *
-from point import *
 
 class Window():
     def __init__(self, width, height):
@@ -39,3 +37,23 @@ class Window():
 # method to draw lines, takes a line object and a fill color and calls the line object's draw() method
     def draw_line(self, line, fill_color):
         line.draw(self.canvas, fill_color)
+
+################################################################################################################################################################################################################################
+
+#Class to handle individual points in the maze. Takes two coordinates as input, x = 0 is the left side, y = 0 is the top of the window
+class Point():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+################################################################################################################################################################################################################################
+
+# Class for lines in the maze, takes 2 point objects as input
+class Line():
+    def __init__(self, point1, point2):
+        self.point1 = point1
+        self.point2 = point2
+
+# method to draw lines, takes a canvas and a fill color. the fill color is a string "black", "red", etc.
+    def draw(self, canvas, fill_color="black"):
+        canvas.create_line(self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill=fill_color, width=2)
