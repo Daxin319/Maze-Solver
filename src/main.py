@@ -1,0 +1,10 @@
+#Main File for the program
+
+from window import *
+
+def main():
+    win = Window(800, 600)
+    win.wait_for_close()
+
+
+main()
