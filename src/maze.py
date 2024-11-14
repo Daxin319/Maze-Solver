@@ -176,6 +176,30 @@ class Maze:
             self.successful_path = list(self.path)
             return True
         #check adjacent cells visited status and if it has a wall between current cell and it. If there is no wall and the cell is unvisted it draws a move in red then calls _depth_first on the next cell. If True return True, else draw undo move.
+        if j < self.num_rows - 1:
+            bottom_cell = self.cells[i][j + 1]
+            if bottom_cell.visited == False:
+                if bottom_cell.has_top_wall == False:
+                    cell.draw_move(bottom_cell)
+                    self._animate(solve=True)
+                    solved = self._depth_first(i, j + 1)
+                    if solved == True:
+                        return True
+                    else:
+                        cell.draw_move(bottom_cell, undo=True)
+                        self._animate(undo=True)
+        if i < self.num_cols - 1:
+            right_cell = self.cells[i + 1][j]
+            if right_cell.visited == False:
+                if right_cell.has_left_wall == False:
+                    cell.draw_move(right_cell)
+                    self._animate(solve=True)
+                    solved = self._depth_first(i + 1, j)
+                    if solved == True:
+                        return True
+                    else:
+                        cell.draw_move(right_cell, undo=True)
+                        self._animate(undo=True)
         if i > 0:
             left_cell = self.cells[i - 1][j]
             if left_cell.visited == False:
@@ -199,30 +223,6 @@ class Maze:
                         return True
                     else:
                         cell.draw_move(top_cell, undo=True)
-                        self._animate(undo=True)
-        if i < self.num_cols - 1:
-            right_cell = self.cells[i + 1][j]
-            if right_cell.visited == False:
-                if right_cell.has_left_wall == False:
-                    cell.draw_move(right_cell)
-                    self._animate(solve=True)
-                    solved = self._depth_first(i + 1, j)
-                    if solved == True:
-                        return True
-                    else:
-                        cell.draw_move(right_cell, undo=True)
-                        self._animate(undo=True)
-        if j < self.num_rows - 1:
-            bottom_cell = self.cells[i][j + 1]
-            if bottom_cell.visited == False:
-                if bottom_cell.has_top_wall == False:
-                    cell.draw_move(bottom_cell)
-                    self._animate(solve=True)
-                    solved = self._depth_first(i, j + 1)
-                    if solved == True:
-                        return True
-                    else:
-                        cell.draw_move(bottom_cell, undo=True)
                         self._animate(undo=True)
         self.path.pop()
         return False
