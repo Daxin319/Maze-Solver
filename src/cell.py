@@ -16,6 +16,7 @@ class Cell():
         self.has_right_wall = True
         self.has_top_wall = True
         self.has_bottom_wall = True
+        self.visited = False
 
     def draw(self):
 
@@ -74,6 +75,7 @@ class Cell():
         path = Line(center_self, center_to_cell)
         # draw the line depending on undo state
         if undo == False:
-            path.draw(self.win, "red")
+            path.draw(self.win, "red", width=10)
         else:
+            path.draw(self.win, "#d9d9d9", width=10)
             path.draw(self.win, "grey")
