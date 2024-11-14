@@ -64,7 +64,7 @@ class Cell():
             bottom_wall.draw(self.win, "#d9d9d9")
 
     # method draws a line from the center of self to another cell, red line if undo is false, grey if true for better mapping graphics
-    def draw_move(self, to_cell, undo=False):
+    def draw_move(self, to_cell, undo=False, solved=False):
         # calculate center points and create line
         x1 = (self.x2 + self.x1) // 2
         y1 = (self.y2 + self.y1) // 2
@@ -74,8 +74,10 @@ class Cell():
         center_to_cell = Point(x2, y2)
         path = Line(center_self, center_to_cell)
         # draw the line depending on undo state
-        if undo == False:
+        if undo == False and solved == False:
             path.draw(self.win, "red", width=10)
-        else:
+        if undo == True and solved == False:
             path.draw(self.win, "#d9d9d9", width=10)
             path.draw(self.win, "grey")
+        if solved == True:
+            path.draw(self.win, "green", width=10)

@@ -8,7 +8,7 @@ def main():
     # Initialize the window
     win = Window(800, 600)
 
-    maze = Maze(10, 10, 20, 30, 50, 50, win)
+    maze = Maze(10, 10, 22 , 30, 25, 25, win)
     print("Creating Grid...")
     maze._create_cells()
     print("Generating maze...")

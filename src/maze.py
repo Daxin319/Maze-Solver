@@ -14,6 +14,8 @@ class Maze:
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self.win = win
+        self.path = []
+        self.successful_path = []
         if seed == None:
             self.seed = random.seed(seed)
         else:
@@ -148,7 +150,9 @@ class Maze:
     # solve method calls _solve_r and returns True if maze solved and False if not
     def solve(self):
         solved = self._solve_r(0, 0)
+        self.path = []
         if solved == True:
+            self._animate_solution_path()
             return True
         else:
             return False
@@ -156,13 +160,20 @@ class Maze:
     # run solving algor
     def _solve_r(self, i, j, search_type="Depth First"):
         if search_type == "Depth First":
-            return self._depth_first(i, j)
+            solved = self._depth_first(i, j)
+            if solved == True:
+                return True
+            else:
+                return False
 
     # depth first solving algorithm
     def _depth_first(self, i, j):
         cell = self.cells[i][j]
         cell.visited = True
+        self.path.append(cell)
         if cell == self.cells[self.num_cols - 1][self.num_rows - 1]:
+            # Record the successful path
+            self.successful_path = list(self.path)
             return True
         #check adjacent cells visited status and if it has a wall between current cell and it. If there is no wall and the cell is unvisted it draws a move in red then calls _depth_first on the next cell. If True return True, else draw undo move.
         if i > 0:
@@ -213,4 +224,16 @@ class Maze:
                     else:
                         cell.draw_move(bottom_cell, undo=True)
                         self._animate(undo=True)
+        self.path.pop()
         return False
+
+    def _animate_solution_path(self):
+        if not self.successful_path:
+            print("No successful path found for animation.")
+            return
+    
+        for i in range(len(self.successful_path) - 1):
+            cell = self.successful_path[i]
+            next_cell = self.successful_path[i + 1]
+            cell.draw_move(next_cell, solved=True)
+            self._animate()
