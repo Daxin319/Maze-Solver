@@ -58,7 +58,7 @@ class Maze:
             time.sleep(0.1)
         time.sleep(0.01)
 
-    # The maze will always start at 0,0 and end at self.win.width, self.win.height
+    # The maze will always start at 0,0 and end at either the end of a column or row on the bottom or right side
     def _break_entrance_and_exit(self):
         # get random int to determine which wall will be broken to start
         start = random.randint(0, 1)
@@ -73,10 +73,18 @@ class Maze:
         
         # end (bottom right) cell logic
         if end == 0:
-            self.cells[-1][-1].has_right_wall = False
+            #pick a row to make the end cell
+            row = random.randint(0, len(self.cells[0]) - 1)
+            self.cells[-1][row].has_right_wall = False
+            self.end = self.cells[-1][row]
+            self._draw_cell(-1, row, animate=True)
         else:
-            self.cells[-1][-1].has_bottom_wall = False
-        self._draw_cell(-1, -1, animate=True)
+            # pick a column to make the end cell
+            col = random.randint(0, len(self.cells) - 1)
+            self.cells[col][-1].has_bottom_wall = False
+            self.end = self.cells[col][-1]
+            self._draw_cell(col, -1, animate=True)
+
 
     # Depth first cell traversal to create maze
     def _break_walls_r(self, i, j):
@@ -171,7 +179,7 @@ class Maze:
         cell = self.cells[i][j]
         cell.visited = True
         self.path.append(cell)
-        if cell == self.cells[self.num_cols - 1][self.num_rows - 1]:
+        if cell == self.end:
             # Record the successful path
             self.successful_path = list(self.path)
             return True
