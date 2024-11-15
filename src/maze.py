@@ -157,7 +157,7 @@ class Maze:
 
     # solve method calls _solve_r and returns True if maze solved and False if not
     def solve(self):
-        solved = self._solve_r(0, 0)
+        solved = self._solve_r(0, 0, search_type="Breadth First")
         self.path = []
         if solved == True:
             self._animate_solution_path()
@@ -169,6 +169,12 @@ class Maze:
     def _solve_r(self, i, j, search_type="Depth First"):
         if search_type == "Depth First":
             solved = self._depth_first(i, j)
+            if solved == True:
+                return True
+            else:
+                return False
+        if search_type == "Breadth First":
+            solved = self._breadth_first(i, j)
             if solved == True:
                 return True
             else:
@@ -245,3 +251,106 @@ class Maze:
             next_cell = self.successful_path[i + 1]
             cell.draw_move(next_cell, solved=True)
             self._animate()
+
+
+
+    def _breadth_first(self, start_i, start_j):
+        # Initialize starting cell
+        start_cell = self.cells[start_i][start_j]
+        to_try = [(start_i, start_j)]  # Use deque for efficient FIFO and store coordinates
+        # Set the start cell as visited
+        start_cell.visited = True
+        parents = {(start_i, start_j): None}  # Dictionary to track the parent of each cell by coordinates
+
+        # Breadth-First Search loop
+        while len(to_try) > 0:
+            cur_i, cur_j = to_try.pop(0)  # Pop from the left for FIFO behavior
+            current = self.cells[cur_i][cur_j]
+
+            # Check if we have reached the end
+            if current == self.end:
+                # Record the successful path by backtracking using parents dictionary
+                self._record_successful_path(parents, (cur_i, cur_j))
+                # Backtrack to clean up all moves except the successful path before drawing the solution
+                visited_cells = set(parents.keys())
+                for cell_coords in visited_cells:
+                    if self.cells[cell_coords[0]][cell_coords[1]] not in self.successful_path:
+                        cur_i, cur_j = cell_coords
+                        parent_coords = parents[(cur_i, cur_j)]
+                        if parent_coords is not None:
+                            parent_i, parent_j = parent_coords
+                            parent = self.cells[parent_i][parent_j]
+                            current = self.cells[cur_i][cur_j]
+                            current.draw_move(parent, undo=True)  # Undo the move
+                            self._animate()  # Update visualization after undoing
+                # Animate the final solution path
+                self._animate(solve=True)  # Update visualization after finding the solution
+                return True
+
+            # Explore all neighbors (bottom, right, top, left)
+            has_valid_moves = False
+            for direction in ["bottom", "right", "top", "left"]:
+                neighbor_i, neighbor_j = self._get_neighbor_indices(cur_i, cur_j, direction)
+                if neighbor_i is not None and neighbor_j is not None:
+                    neighbor = self.cells[neighbor_i][neighbor_j]
+                    if not neighbor.visited:
+                        # Add only if there is no wall between `current` and `neighbor`
+                        if self._can_move(current, neighbor, cur_i, cur_j, neighbor_i, neighbor_j):
+                            # Draw the move from `current` to `neighbor`
+                            current.draw_move(neighbor)  # Draw in red for forward path
+                            self._animate(solve=True)  # Update visualization after drawing
+                            # Mark the neighbor as visited and add to queue
+                            neighbor.visited = True
+                            parents[(neighbor_i, neighbor_j)] = (cur_i, cur_j)
+                            to_try.append((neighbor_i, neighbor_j))
+                            has_valid_moves = True
+
+        # If we exit the loop without reaching the end, we backtrack through the failed cells
+        # Here we undo the visual representation of the unsuccessful path.
+        for key, parent_coords in parents.items():
+            if parent_coords is not None:  # Skip the start cell
+                cur_i, cur_j = key
+                parent_i, parent_j = parent_coords
+                current = self.cells[cur_i][cur_j]
+                parent = self.cells[parent_i][parent_j]
+                # Undo the move (draw a gray line for backtracking)
+                parent.draw_move(current, undo=True)
+                self._animate()  # Update visualization after undoing
+
+        print("No successful path found.")
+        return False
+
+    # Helper methods for BFS
+    # Record the successful path from the parents dictionary
+    def _record_successful_path(self, parents, end_coords):
+        current_coords = end_coords
+        while current_coords is not None:
+            i, j = current_coords
+            self.successful_path.append(self.cells[i][j])
+            current_coords = parents[current_coords]
+        self.successful_path.reverse()
+
+    # Get the neighbor cell indices based on direction in a column-major grid system
+    def _get_neighbor_indices(self, i, j, direction):
+        if direction == "bottom" and j < self.num_rows - 1:  # Move down in the grid
+            return i, j + 1
+        elif direction == "right" and i < self.num_cols - 1:  # Move right in the grid
+            return i + 1, j
+        elif direction == "top" and j > 0:  # Move up in the grid
+            return i, j - 1
+        elif direction == "left" and i > 0:  # Move left in the grid
+            return i - 1, j
+        return None, None
+
+    # Check if we can move between `current` and `neighbor` (no wall present)
+    def _can_move(self, current, neighbor, cur_i, cur_j, neighbor_i, neighbor_j):
+        # Implement wall checks for different directions based on relative positions
+        if cur_i < neighbor_i:  # Moving right
+            return not current.has_right_wall
+        elif cur_i > neighbor_i:  # Moving left
+            return not current.has_left_wall
+        elif cur_j < neighbor_j:  # Moving down
+            return not current.has_bottom_wall
+        elif cur_j > neighbor_j:  # Moving up
+            return not current.has_top_wall
+        return False
