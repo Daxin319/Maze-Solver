@@ -15,7 +15,7 @@ def main():
     maze._break_entrance_and_exit()
     maze._break_walls_r(0, 0)
     maze._reset_cell_visited()
-    print("Running Depth First algorithm to solve the maze...")
+    print("Running Breadth First algorithm to solve the maze...")
     maze.solve()
 
     # Keep the window open until closed by the user
